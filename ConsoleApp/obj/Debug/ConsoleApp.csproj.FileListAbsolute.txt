@@ -1,0 +1,10 @@
+F:\Personal\Console\ConsoleApp\ConsoleApp\bin\Debug\ConsoleApp.exe.config
+F:\Personal\Console\ConsoleApp\ConsoleApp\bin\Debug\ConsoleApp.exe
+F:\Personal\Console\ConsoleApp\ConsoleApp\bin\Debug\ConsoleApp.pdb
+F:\Personal\Console\ConsoleApp\ConsoleApp\bin\Debug\ServiceStack.Common.dll
+F:\Personal\Console\ConsoleApp\ConsoleApp\bin\Debug\ServiceStack.Interfaces.dll
+F:\Personal\Console\ConsoleApp\ConsoleApp\bin\Debug\ServiceStack.Redis.dll
+F:\Personal\Console\ConsoleApp\ConsoleApp\bin\Debug\ServiceStack.Text.dll
+F:\Personal\Console\ConsoleApp\ConsoleApp\obj\Debug\ConsoleApp.csprojResolveAssemblyReference.cache
+F:\Personal\Console\ConsoleApp\ConsoleApp\obj\Debug\ConsoleApp.exe
+F:\Personal\Console\ConsoleApp\ConsoleApp\obj\Debug\ConsoleApp.pdb
