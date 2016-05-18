@@ -20,7 +20,9 @@ namespace ConsoleApp
             //show_rencent_posts_and_comments();
             //show_a_tag_cloud();
             //show_post_and_all_comments();
-            add_comment_to_existing_post();
+            //add_comment_to_existing_post();
+            //add_string_test();
+            delete_a_post(2);
             Console.ReadKey();
         }
         public static void InsertTestData()
@@ -163,6 +165,18 @@ namespace ConsoleApp
             var refreshblogpost = redisblogposts.GetById(postid);
             refreshblogpost.PrintDump();
         }
+        public static void add_string_test()
+        {
+            redis.Add<string>("urn:str1","hello");
+            redis.Add<string>("urn:str2","hi");
+        }
+
+        public static void delete_a_post(int id)
+        {
+            var redisposts = redis.As<BlogPost>();            
+            redisposts.DeleteById(id);
+        }
+
         
     }
 
