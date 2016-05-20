@@ -10,8 +10,69 @@ namespace ConsoleApp
     {
         public static void Main(string[] args)
         {
+            IRedisClient redis = new RedisClient("127.0.0.1",6379);
+            redis.FlushAll();
+            IBlogRepository repo = new BlogRepository(redis);
+            InsertTestData(repo);
+            Console.ReadKey();
+        }
+        public static void InsertTestData(IBlogRepository repo)
+        {
+            var jason = new User {Name="shenwei"};
+            jason.Repo = repo;  //这边手动指定还是很坑爹的
+            var jane = new User {Name="zhangxiaomao" };
+            jane.Repo = repo;
+            repo.StoreUsers(jason,jane);
+            var jasonBlog=jason.CreateNewBlog(new Blog { BlogName="CodesHome"});
+            jasonBlog.Repo = repo;
+            var janeBlog=jane.CreateNewBlog(new Blog { BlogName="CodesGarden"});
+            janeBlog.Repo = repo;
+            jasonBlog.StoreNewBlogPosts(
+                 new BlogPost {
+                     Title = "Redis with C#",
+                     categories = new List<string> { "article", "nosql" },
+                     Tags = new List<string> { "redis", "nosql" },
+                     Comments = new List<BlogPostComment> {
+                         new BlogPostComment { Content="Nice post",CreatedDate=DateTime.Now}
+                     }                                         
+                 },
+                 new BlogPost {
+                     Title = "Redis with MemoryCache",
+                     categories = new List<string> { "article", "nosql" },
+                     Tags = new List<string> { "redis", "mvc","cache" },
+                     Comments = new List<BlogPostComment> {
+                         new BlogPostComment { Content="very good post for cache",CreatedDate=DateTime.Now}
+                     }
+                 }
+                );
+            //another blog
+            janeBlog.StoreNewBlogPosts(
+                 new BlogPost
+                 {
+                     Title = "WPF demo",
+                     categories = new List<string> { "wpf", "windows" },
+                     Tags = new List<string> { "winform", "wpf" },
+                     Comments = new List<BlogPostComment> {
+                         new BlogPostComment { Content="Nice post about wpf",CreatedDate=DateTime.Now}
+                     }
+                 },
+                 new BlogPost
+                 {
+                     Title = "ORM",
+                     categories = new List<string> { "DataBase", "ORM" },
+                     Tags = new List<string> { "DataBase", "OrmLite" },
+                     Comments = new List<BlogPostComment> {
+                         new BlogPostComment { Content="very good post for building own orm",CreatedDate=DateTime.Now}
+                     }
+                 }
+                );
+
+
+
 
         }
+
+
     }
 
     #region Blog Models
@@ -48,6 +109,11 @@ namespace ConsoleApp
     }
     public class Blog:IHasBlogRepository
     {
+        public Blog()
+        {
+            this.Tags = new List<string>();
+            this.BlogPostIds = new List<long>();
+        }
         public long ID { get; set; }
         public string BlogName { get; set; }
         public long UserID { get; set; }
@@ -122,6 +188,11 @@ namespace ConsoleApp
     public class BlogRepository:IBlogRepository
     {
         private readonly IRedisClient redis;
+        const string RecentBlogPostKey = "urn:BlogPosts:RecentPosts";
+        const string RecentBlogPostCommentsKey = "urn:BlogPostComments:RecentComments";
+        const string TagsCloudKey = "urn:TagsCloud";
+        const string AllCategoryKey = "urn:AllCategories";
+
         public BlogRepository(IRedisClient client)
         {
             this.redis = client;
@@ -177,37 +248,73 @@ namespace ConsoleApp
 
         public List<BlogPost> GetBlogPosts(IEnumerable<long> blogPostsIds)
         {
-            throw new NotImplementedException();
+            var redisBlogPosts = redis.As<BlogPost>();
+            return redisBlogPosts.GetByIds(blogPostsIds).ToList();
         }
 
         public void StoreNewBlogPosts(Blog blog, params BlogPost[] blogPosts)
         {
-            throw new NotImplementedException();
+          
+            var redisBlogPosts = redis.As<BlogPost>();
+            var redisBlogComments = redis.As<BlogPostComment>();
+
+            var recentPosts = redisBlogPosts.Lists[RecentBlogPostKey];
+            var recentComments = redisBlogComments.Lists[RecentBlogPostCommentsKey];
+            foreach (var post in blogPosts)
+            {
+                if (post.Id==default(long))
+                {
+                    post.Id = redisBlogPosts.GetNextSequence();                   
+                }
+                post.BlogId = blog.ID;
+                blog.BlogPostIds.Add(post.Id);
+                //do more things
+                //add tag to cloud
+                post.Tags.ForEach(x=>redis.IncrementItemInSortedSet(TagsCloudKey,x,1));
+                //add recentPosts
+                recentPosts.Prepend(post);
+                //add recentComments
+                post.Comments.ForEach(recentComments.Prepend);
+                //add categories
+                post.categories.ForEach(x=>redis.AddItemToSet(AllCategoryKey,x));
+            }
+            //取前5作为最近
+            recentPosts.Trim(0,4);
+            recentComments.Trim(0,4);
+            using (var trans=redis.CreateTransaction())
+            {
+                trans.QueueCommand(x=>x.Store(blog));
+                trans.QueueCommand(x=>x.StoreAll(blogPosts));
+                trans.Commit();
+            }
         }
 
         public List<BlogPost> GetRecentBlogPosts()
         {
-            throw new NotImplementedException();
+            var redisBlogPosts = redis.As<BlogPost>();
+            return redisBlogPosts.Lists[RecentBlogPostKey].GetAll();
         }
 
         public List<BlogPostComment> GetRecentBlogPostComments()
         {
-            throw new NotImplementedException();
+            var redisBlogPostComments = redis.As<BlogPostComment>();
+            return redisBlogPostComments.Lists[RecentBlogPostCommentsKey].GetAll();
         }
 
         public IDictionary<string, double> GetTopTags(int take)
         {
-            throw new NotImplementedException();
+            //excellent
+            return redis.GetRangeWithScoresFromSortedSetDesc(TagsCloudKey,0,take-1);
         }
 
         public HashSet<string> GetAllCategories()
         {
-            throw new NotImplementedException();
+            return redis.GetAllItemsFromSet(AllCategoryKey);
         }
 
         public void StoreBlogPost(BlogPost blogPost)
         {
-            throw new NotImplementedException();
+            
         }
 
         public BlogPost GetBlogPost(params long[] postid)
