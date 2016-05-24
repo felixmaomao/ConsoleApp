@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ServiceStack.Redis;
 using ServiceStack.Redis.Generic;
+using ServiceStack.Text;
 namespace ConsoleApp
 {
     public class 弱类型redis测试
@@ -15,13 +16,13 @@ namespace ConsoleApp
             user_shenwei.CreateBlog(new Blog { ID=1,BlogName="CodesHome"});
             user_shenwei.CreateBlog(new Blog { ID=2,BlogName="CodesGarden"});
            
-
             User user_zhangxiaomao = new User { ID=2,FirstName="zhang",LastName="xiaomao"};
             user_zhangxiaomao.WriteAPost(new Blog {ID=3,BlogName="CodesGallary" },new BlogPost {ID=1,Title="redis深度测试",Content="redis深度测试",Comments=new List<BlogComment> { } });
 
             Repo<User> users = new Repo<User>();
             users.add(user_shenwei);
             users.add(user_zhangxiaomao);
+                     
             Console.ReadKey();
         }
     }
@@ -89,7 +90,7 @@ namespace ConsoleApp
 
     public interface IRepo<T>
     {
-        IEnumerable<T> GetAll();
+        IEnumerable<T> GetAll(string key_all);
         void add(T entity);
         void delete(long id);
 
@@ -133,11 +134,19 @@ namespace ConsoleApp
             throw new NotImplementedException();
         }
 
-        public IEnumerable<T> GetAll()
+        public IEnumerable<T> GetAll(string key_all)
         {
-            return null;  //这边咋搞？
-        }
-    }
+            //有一种做法是 有一个专门的key_all来指向一个值， 这个值是所有东西拼成的json串，每添加一个东西的时候，不但要单独添加，然后还要手动拼接json串。。。
+            //为验证是否拼接成功，还要再json反序列化一次。。 这样真的好么。。。。。 想到一个好处，就是 前端取得时候取得就直接是json串了。
+            //redisTypedClient强类型的好处可能在于可以对其进行linq操作，取得我们想要的值。（json虽然借助newtonsoft也可以，但应该没这么方便。这大概是使用强类型的好处。
+            //但是使用强类型的坏处。rediskey不怎么好直接指定啊。。）
 
+                               
+            return redis.Get<List<T>>(key_all);    
+        }
+
+     
+
+    }
 
 }
