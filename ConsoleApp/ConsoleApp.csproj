@@ -65,6 +65,9 @@
     <Compile Include="redisList表现形式.cs" />
     <Compile Include="redis存储文件夹测试.cs" />
     <Compile Include="redis测试.cs" />
+    <Compile Include="static测试.cs" />
+    <Compile Include="单例模式.cs" />
+    <Compile Include="异常处理.cs" />
     <Compile Include="弱类型redis测试.cs" />
   </ItemGroup>
   <ItemGroup>
