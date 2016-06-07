@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp
 {
-    class static测试
+    class ContentType以及ContentEncoding
     {
-        
     }
 }
