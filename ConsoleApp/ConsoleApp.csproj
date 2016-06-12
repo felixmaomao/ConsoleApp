@@ -52,6 +52,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,6 +64,7 @@
   <ItemGroup>
     <Compile Include="ContentType以及ContentEncoding.cs" />
     <Compile Include="ControllerBuilder以及相关实现.cs" />
+    <Compile Include="MVC重现.cs" />
     <Compile Include="Pooling测试.cs" />
     <Compile Include="Pooling测试2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
