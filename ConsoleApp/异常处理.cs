@@ -8,5 +8,9 @@ namespace ConsoleApp
 {
     class 异常处理
     {
+        public static void Main(string[] args)
+        {
+           
+        }
     }
 }
