@@ -15,3 +15,5 @@ H:\ConsoleApp\ConsoleApp\bin\Debug\ConsoleApp.exe
 H:\ConsoleApp\ConsoleApp\bin\Debug\ConsoleApp.pdb
 H:\ConsoleApp\ConsoleApp\obj\Debug\ConsoleApp.csprojResolveAssemblyReference.cache
 H:\ConsoleApp\ConsoleApp\bin\Debug\Newtonsoft.Json.dll
+F:\Personal\Console\ConsoleApp\ConsoleApp\obj\Debug\ConsoleApp.csproj.CoreCompileInputs.cache
+F:\Personal\Console\ConsoleApp\ConsoleApp\bin\Debug\Newtonsoft.Json.dll
